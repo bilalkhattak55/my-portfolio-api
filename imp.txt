@@ -1,0 +1,142 @@
+1--------npm init -y
+2--------install important dependencies;
+npm i express mongoose cors dotenv
+
+3--------create app.js;
+require("dotenv").config();
+const express = require('express');
+const app = express();
+const cors = require("cors");
+require("./db/conn")
+const router = require("./Routes/router");
+
+const port = 6002;
+
+
+app.use(cors());
+app.use(express.json());
+
+app.use(router);
+
+// app.get('/', (req, res) => {
+//     res.status(200).json("server started");
+// });
+
+app.listen(port, ()=> {
+    console.log("server is started");
+})
+
+
+4---------make a db folder and conn.js file init;
+const mongoose = require("mongoose");
+
+const DB = process.env.DATABASE;
+
+mongoose.connect(DB, {
+    useUnifiedTopology:true,
+    useNewUrlParser: true
+}).then(()=> console.log("database conntcted")).catch((err) => console.log(err))
+
+
+
+5---------find the link of mongodb in the website and paste it in .env file;
+
+6---------now create model folder and userSchema.js file init;
+const mongoose = require("mongoose");
+const validator = require("validator")
+
+const userSchema = new mongoose.Schema({
+    fname:{
+        type:String,
+        required: true,
+        trim: true
+    },
+    lname:{
+        type:String,
+        required:true,
+        trim:true
+    },
+    email:{
+        type:String,
+        required:true,
+        unique:true,
+        validate(value) {
+            if(!validator.isEmail(value)){
+                throw new Error("invalid email")
+            }
+        }
+    },
+    mobile:{
+        type:String,
+        required: true,
+    },
+    message:[]
+})
+   // create model;
+   const users = new mongoose.model("users", userSchema);
+   module.exports = users;
+
+7-------install validator package for validation of email;
+
+8--------now make Routes folder and router.js file init;
+9-------install nodemailer package for getting the message send functionalty;
+npm i nodemailer
+
+
+10----------const express = require("express");
+const router = new express.Router();
+const users = require("../models/userSchema");
+const nodemailer = require("nodemailer");
+
+//email config;
+const transport = nodemailer.createTransport({
+    service:'gmail',
+    auth:{
+        user:process.env.EMAIL,
+        pass:process.env.PASS
+    }
+});
+
+
+//register user details;
+router.post("/register", async(req, res) => {
+    // const {fname, lname, email, number, message} = req.body;
+    console.log(req.body)
+})
+
+module.exports = router;
+
+
+11------------now goto front end and check for changes;
+const handleSubmit = async(e) => {
+    e.preventDefault()
+
+    const {fname, lname, email, mobile, message} = inputValue;
+    if(fname == ""){
+          toast.error("fname is required")
+    }else if(lname == "") {
+      toast.error("lname is required")
+    }else if(email == "") {
+       toast.error("email is required")
+    } else if(!email.includes("@")){
+      toast.error("invalid email")
+    }else if(mobile == ""){
+         toast.error("mobile number is required")
+    } else {
+      const res = await fetch("http://localhost:6005/register", {
+        method: 'POST',
+        headers: {
+          "Content-type": "application/json"
+        },
+        body:JSON.stringify({
+          fname, lname, email, mobile, message
+        })
+      });
+      const data = res.json();
+      console.log(data)
+    }
+  }
+
+
+  12-------now come back to api and create more functionalties;
+  
