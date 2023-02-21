@@ -1,3 +1,4 @@
+
 require("dotenv").config();
 const express = require('express');
 const app = express();
@@ -12,11 +13,14 @@ app.use(cors());
 app.use(express.json());
 
 app.use(router);
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*")
+  }) 
 
 // app.get('/', (req, res) => {
 //     res.status(200).json("server started");
 // });
 
 app.listen(port, ()=> {
-    console.log("server is started");
+    console.log(`server is started ${port}`);
 })
